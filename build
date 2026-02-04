@@ -1,0 +1,11 @@
+#!/bin/bash
+
+yarn workspace @redhatinsights/backstage-plugin-kafka-info export-dynamic
+cd plugins/kafka-info
+rm *.tgz
+npm pack
+cd ../../
+rm *.tgz
+mv plugins/kafka-info/*.tgz .
+echo "sha256-"$(shasum -a 256 *.tgz | awk '{print $1}' | xxd -r -p | base64)
+

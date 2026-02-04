@@ -1,6 +1,6 @@
-import React from 'react';
 import { createDevApp } from '@backstage/dev-utils';
 import { kafkaInfoPlugin, KafkaInfoPage } from '../src/plugin';
+import '@backstage/ui/css/styles.css';
 
 createDevApp()
   .registerPlugin(kafkaInfoPlugin)

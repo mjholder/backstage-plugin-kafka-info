@@ -14,33 +14,27 @@ import {
   InfoCard,
 } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
-// These will let us get info about our backstage configuration
 import { useApi, configApiRef, fetchApiRef } from '@backstage/core-plugin-api';
 
-export function KafkaInfoComponent() {
+export function KafkaInfoComponent(): React.ReactElement {
   const { entity } = useEntity();
   const title = 'Kafka Information';
 
-  // Get the config object from backstage
   const config = useApi(configApiRef);
   const fetchApi = useApi(fetchApiRef);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  // Set up some state info for the response from the backend
   const [metricResponse, setMetricResponse] = useState<Object>({});
   const [filteredResponse, setFilteredResponse] = useState<Object>({});
 
-  // Get backend URL from the config
   const backendUrl = config.getString('backend.baseUrl');
 
-  // Get defined consumer group from entity
-  const consumerGroup = entity.metadata.annotations?.[KAFKA_INFO_ANNOTATION].split(',') ?? '';
+  const consumerGroup = entity.metadata.annotations?.[KAFKA_INFO_ANNOTATION]?.split(',') ?? [];
 
   useEffect(() => {
     setLoading(true);
-    // Directly query a prometheus endpoint for metric data
     fetchApi.fetch(`${backendUrl}/api/proxy/kafka-lag/query?query=aws_kafka_max_offset_lag_sum`)
       .then(response => {
         return response.json();
@@ -48,25 +42,27 @@ export function KafkaInfoComponent() {
       .then(text => {
         setMetricResponse(text);
       })
-      .catch(error => {
+      .catch(err => {
         setError(true);
-        console.error('Error fetching topic data:', error);
+        console.error('Error fetching topic data:', err);
         setLoading(false);
       });
-  }, []);
+  }, [backendUrl, fetchApi]);
 
   useEffect(() => {
     setLoading(true);
     setError(false);
-    const filteredGroup = metricResponse.data?.result?.filter((mentry) => {
-      return consumerGroup.some(e => { return e === mentry.metric.group });
+    type MetricResult = { metric: { group: string; topic: string }; value: [number, string] };
+    const data = (metricResponse as { data?: { result?: MetricResult[] } }).data;
+    const filteredGroup = data?.result?.filter((mentry: MetricResult) => {
+      return consumerGroup.some(e => e === mentry.metric.group);
     });
-    if (filteredGroup == "" || filteredGroup === undefined) {
+    if (filteredGroup === undefined || (Array.isArray(filteredGroup) && filteredGroup.length === 0)) {
       setError(true);
     }
-    setFilteredResponse(filteredGroup);
+    setFilteredResponse(filteredGroup ?? []);
     setLoading(false);
-  }, [metricResponse]);
+  }, [metricResponse, consumerGroup]);
 
   if (loading) {
     return (
@@ -87,6 +83,7 @@ export function KafkaInfoComponent() {
   }
 
   const TopicsTable = () => {
+    const results = filteredResponse as Array<{ metric: { topic: string }; value: [number, string] }>;
     return (
       <TableContainer component={Paper}>
         <Table size="small" aria-label="Topics">
@@ -97,7 +94,7 @@ export function KafkaInfoComponent() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredResponse?.map((ent) => (
+            {results?.map((ent) => (
               <TableRow key={ent.metric.topic}>
                 <TableCell component="th" scope="row">
                   {ent.metric.topic}
@@ -117,4 +114,3 @@ export function KafkaInfoComponent() {
     </InfoCard>
   );
 }
-

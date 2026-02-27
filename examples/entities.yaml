@@ -19,6 +19,20 @@ spec:
   system: examples
   providesApis: [example-grpc-api]
 ---
+# Test component for kafka-info plugin (shows Kafka card when annotation is present)
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: example-kafka-service
+  description: Example service with Kafka consumer groups for testing the kafka-info plugin
+  annotations:
+    kafka-info/consumer-groups: example-consumer-group,another-consumer-group
+spec:
+  type: service
+  lifecycle: experimental
+  owner: guests
+  system: examples
+---
 # https://backstage.io/docs/features/software-catalog/descriptor-format#kind-api
 apiVersion: backstage.io/v1alpha1
 kind: API

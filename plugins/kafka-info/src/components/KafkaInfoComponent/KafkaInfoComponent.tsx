@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, type ReactElement } from 'react';
 import { KAFKA_INFO_ANNOTATION } from './constants';
 import {
   Paper,
@@ -16,7 +16,7 @@ import {
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { useApi, configApiRef, fetchApiRef } from '@backstage/core-plugin-api';
 
-export function KafkaInfoComponent(): React.ReactElement {
+export function KafkaInfoComponent(): ReactElement {
   const { entity } = useEntity();
   const title = 'Kafka Information';
 
@@ -31,7 +31,10 @@ export function KafkaInfoComponent(): React.ReactElement {
 
   const backendUrl = config.getString('backend.baseUrl');
 
-  const consumerGroup = entity.metadata.annotations?.[KAFKA_INFO_ANNOTATION]?.split(',') ?? [];
+  const consumerGroup = useMemo(
+    () => entity.metadata.annotations?.[KAFKA_INFO_ANNOTATION]?.split(',') ?? [],
+    [entity.metadata.annotations],
+  );
 
   useEffect(() => {
     setLoading(true);
@@ -42,9 +45,8 @@ export function KafkaInfoComponent(): React.ReactElement {
       .then(text => {
         setMetricResponse(text);
       })
-      .catch(err => {
+      .catch(() => {
         setError(true);
-        console.error('Error fetching topic data:', err);
         setLoading(false);
       });
   }, [backendUrl, fetchApi]);

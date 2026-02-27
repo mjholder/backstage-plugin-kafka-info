@@ -1,11 +1,11 @@
-import React from 'react';
+import type { ReactElement } from 'react';
 import { createDevApp } from '@backstage/dev-utils';
 import { kafkaInfoPlugin, EntityKafkaInfoContent } from '../src';
 import { Content, Header, Page } from '@backstage/core-components';
 import { EntityProvider } from '@backstage/plugin-catalog-react';
 import { createEntity } from './entity';
 
-const DevPage = (): React.ReactElement => (
+const DevPage = (): ReactElement => (
   <EntityProvider entity={createEntity()}>
     <Page themeId="home">
       <Header title="Kafka Info" />

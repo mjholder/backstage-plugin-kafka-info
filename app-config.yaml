@@ -50,6 +50,12 @@ proxy:
   #   '/test':
   #     target: 'https://example.com'
   #     changeOrigin: true
+  endpoints:
+    '/kafka-lag':
+      target: '${STAGE_PROMETHEUS_URL}'
+      allowedHeaders: ['Authorization']
+      headers:
+        Authorization: "Bearer ${STAGE_PROMETHEUS_TOKEN}"
 
 # Reference documentation http://backstage.io/docs/features/techdocs/configuration
 # Note: After experimenting with basic setup, use CI/CD to generate docs

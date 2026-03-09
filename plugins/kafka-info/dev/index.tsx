@@ -1,11 +1,11 @@
 import { createDevApp } from '@backstage/dev-utils';
-import { kafkaInfoPlugin, KafkaInfoPage } from '../src/plugin';
+import { kafkaInfoPlugin } from '../src/plugin';
 import '@backstage/ui/css/styles.css';
 
 createDevApp()
   .registerPlugin(kafkaInfoPlugin)
   .addPage({
-    element: <KafkaInfoPage />,
+    element: <div>Kafka Info Plugin</div>,
     title: 'Root Page',
     path: '/kafka-info',
   })

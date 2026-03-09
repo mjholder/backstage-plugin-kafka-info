@@ -18,7 +18,8 @@ export const EntityKafkaInfoContent = kafkaInfoPlugin.provide(
   createComponentExtension({
     name: 'EntityKafkaInfoContent',
     component: {
-      lazy: () => import('./components/KafkaInfoComponent').then(m => m.KafkaInfoComponent),
+      lazy: () =>
+        import('./components/KafkaInfoComponent').then(m => m.KafkaInfoComponent),
     },
   }),
 );

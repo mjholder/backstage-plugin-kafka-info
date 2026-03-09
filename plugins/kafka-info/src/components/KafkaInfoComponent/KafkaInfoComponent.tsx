@@ -1,77 +1,84 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { KAFKA_INFO_ANNOTATION } from './constants';
 import {
   Paper,
   Table,
-  TableContainer,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Typography,
 } from '@material-ui/core';
-import {
-  InfoCard,
-} from '@backstage/core-components';
+import { InfoCard } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
-// These will let us get info about our backstage configuration
-import { useApi, configApiRef, fetchApiRef } from '@backstage/core-plugin-api';
+import { configApiRef, fetchApiRef, useApi } from '@backstage/core-plugin-api';
+
+interface MetricResult {
+  metric: { group?: string; topic?: string };
+  value: [number, string];
+}
 
 export function KafkaInfoComponent() {
   const { entity } = useEntity();
   const title = 'Kafka Information';
 
-  // Get the config object from backstage
   const config = useApi(configApiRef);
   const fetchApi = useApi(fetchApiRef);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  // Set up some state info for the response from the backend
-  const [metricResponse, setMetricResponse] = useState<Object>({});
-  const [filteredResponse, setFilteredResponse] = useState<Object>({});
+  const [metricResponse, setMetricResponse] = useState<{
+    data?: { result?: MetricResult[] };
+  }>({});
+  const [filteredResponse, setFilteredResponse] = useState<MetricResult[]>([]);
 
-  // Get backend URL from the config
   const backendUrl = config.getString('backend.baseUrl');
-
-  // Get defined consumer group from entity
-  const consumerGroup = entity.metadata.annotations?.[KAFKA_INFO_ANNOTATION].split(',') ?? '';
+  const annotationValue =
+    entity.metadata.annotations?.[KAFKA_INFO_ANNOTATION] ?? '';
+  const consumerGroup = useMemo(
+    () =>
+      annotationValue
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean),
+    [annotationValue],
+  );
 
   useEffect(() => {
     setLoading(true);
-    // Directly query a prometheus endpoint for metric data
-    fetchApi.fetch(`${backendUrl}/api/proxy/kafka-lag/query?query=aws_kafka_max_offset_lag_sum`)
-      .then(response => {
-        return response.json();
-      })
-      .then(text => {
+    fetchApi
+      .fetch(
+        `${backendUrl}/api/proxy/kafka-lag/query?query=aws_kafka_max_offset_lag_sum`,
+      )
+      .then(response => response.json())
+      .then((text: { data?: { result?: MetricResult[] } }) => {
         setMetricResponse(text);
       })
-      .catch(error => {
+      .catch(err => {
         setError(true);
-        console.error('Error fetching topic data:', error);
+        console.error('Error fetching topic data:', err);
         setLoading(false);
       });
-  }, []);
+  }, [backendUrl, fetchApi]);
 
   useEffect(() => {
-    setLoading(true);
-    setError(false);
-    const filteredGroup = metricResponse.data?.result?.filter((mentry) => {
-      return consumerGroup.some(e => { return e === mentry.metric.group });
-    });
-    if (filteredGroup == "" || filteredGroup === undefined) {
+    const results = metricResponse.data?.result ?? [];
+    const filteredGroup = results.filter(mentry =>
+      consumerGroup.some(e => e === mentry.metric.group),
+    );
+    if (filteredGroup.length === 0 && results.length > 0) {
       setError(true);
     }
     setFilteredResponse(filteredGroup);
     setLoading(false);
-  }, [metricResponse]);
+  }, [metricResponse, consumerGroup]);
 
   if (loading) {
     return (
       <InfoCard title={title}>
-        <Typography align="center" variant="body1">Loading...</Typography>
+        <Typography>Loading...</Typography>
       </InfoCard>
     );
   }
@@ -79,42 +86,31 @@ export function KafkaInfoComponent() {
   if (error) {
     return (
       <InfoCard title={title}>
-        <Typography align="center" variant="body1">
-          Error loading {title}.
-        </Typography>
+        <Typography>Error loading {title}.</Typography>
       </InfoCard>
     );
   }
 
-  const TopicsTable = () => {
-    return (
+  return (
+    <InfoCard title={title}>
       <TableContainer component={Paper}>
-        <Table size="small" aria-label="Topics">
+        <Table size="small">
           <TableHead>
             <TableRow>
               <TableCell>Topics</TableCell>
-              <TableCell align="right">Current Lag</TableCell>
+              <TableCell>Current Lag</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredResponse?.map((ent) => (
-              <TableRow key={ent.metric.topic}>
-                <TableCell component="th" scope="row">
-                  {ent.metric.topic}
-                </TableCell>
-                <TableCell align="right">{ent.value[1]}</TableCell>
+            {filteredResponse?.map((ent, idx) => (
+              <TableRow key={`${ent.metric.topic}-${idx}`}>
+                <TableCell>{ent.metric.topic}</TableCell>
+                <TableCell>{ent.value[1]}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-    );
-  };
-
-  return (
-    <InfoCard title={title} noPadding>
-      <TopicsTable />
     </InfoCard>
   );
 }
-

@@ -1,7 +1,9 @@
-# kafka-info
+# Kafka Info Plugin
 
-Welcome to the kafka-info plugin!
+Shows active topics and consumer lag for catalog entities with the
+`kafka-info/consumer-groups` annotation.
 
-_This plugin was created through the Backstage CLI_
+## Configuration
 
-See the monorepo readme for more information!
+See root [README](../../README.md) and `app-config.yaml` for proxy and
+dynamic plugin mount configuration.

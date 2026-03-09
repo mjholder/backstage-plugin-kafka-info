@@ -1,3 +1,1 @@
-export {
-	KafkaInfoComponent,
-} from './KafkaInfoComponent';
+export { KafkaInfoComponent } from './KafkaInfoComponent';

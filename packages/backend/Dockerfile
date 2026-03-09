@@ -8,6 +8,9 @@
 # yarn build:backend
 #
 # Once the commands have been run, you can build the image using `yarn build-image`
+#
+# Alternatively, there is also a multi-stage Dockerfile documented here:
+# https://backstage.io/docs/deployment/docker#multi-stage-build
 
 FROM node:24-trixie-slim
 
@@ -56,7 +59,7 @@ RUN tar xzf skeleton.tar.gz && rm skeleton.tar.gz
 
 RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid=1000 \
     yarn workspaces focus --all --production && rm -rf "$(yarn cache clean)"
- 
+
 # This will include the examples, if you don't need these simply remove this line
 COPY --chown=node:node examples ./examples
 

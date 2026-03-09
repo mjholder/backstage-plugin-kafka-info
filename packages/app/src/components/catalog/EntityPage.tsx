@@ -28,10 +28,6 @@ import {
   EntityRelationWarning,
 } from '@backstage/plugin-catalog';
 import {
-  EntityKafkaInfoContent,
-  isPluginApplicableToEntity as isKafkaInfoAvailable,
-} from '@redhatinsights/backstage-plugin-kafka-info';
-import {
   EntityUserProfileCard,
   EntityGroupProfileCard,
   EntityMembersListCard,
@@ -61,6 +57,10 @@ import {
   EntityKubernetesContent,
   isKubernetesAvailable,
 } from '@backstage/plugin-kubernetes';
+import {
+  EntityKafkaInfoContent,
+  isPluginApplicableToEntity as isKafkaInfoApplicableToEntity,
+} from '@redhatinsights/backstage-plugin-kafka-info';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -81,7 +81,6 @@ const cicdContent = (
         <EntityGithubActionsContent />
       </EntitySwitch.Case>
      */}
-
     <EntitySwitch.Case>
       <EmptyState
         title="No CI/CD available for this entity"
@@ -145,10 +144,9 @@ const overviewContent = (
     <Grid item md={8} xs={12}>
       <EntityHasSubcomponentsCard variant="gridItem" />
     </Grid>
-
     <EntitySwitch>
-      <EntitySwitch.Case if={isKafkaInfoAvailable}>
-        <Grid item md={4} xs={12}>
+      <EntitySwitch.Case if={isKafkaInfoApplicableToEntity}>
+        <Grid item md={6} xs={12}>
           <EntityKafkaInfoContent />
         </Grid>
       </EntitySwitch.Case>

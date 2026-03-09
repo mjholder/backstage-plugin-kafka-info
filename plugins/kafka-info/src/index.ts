@@ -1,5 +1,5 @@
 export {
   kafkaInfoPlugin,
   EntityKafkaInfoContent,
-  isPluginApplicableToEntity
+  isPluginApplicableToEntity,
 } from './plugin';

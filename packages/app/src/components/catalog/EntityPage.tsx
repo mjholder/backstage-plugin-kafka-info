@@ -28,10 +28,6 @@ import {
   EntityRelationWarning,
 } from '@backstage/plugin-catalog';
 import {
-  EntityKafkaInfoContent,
-  isPluginApplicableToEntity as isKafkaInfoAvailable,
-} from '@redhatinsights/backstage-plugin-kafka-info';
-import {
   EntityUserProfileCard,
   EntityGroupProfileCard,
   EntityMembersListCard,
@@ -61,6 +57,10 @@ import {
   EntityKubernetesContent,
   isKubernetesAvailable,
 } from '@backstage/plugin-kubernetes';
+import {
+  EntityKafkaInfoContent,
+  isPluginApplicableToEntity as isKafkaInfoAvailable,
+} from '@redhatinsights/backstage-plugin-kafka-info';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -81,7 +81,6 @@ const cicdContent = (
         <EntityGithubActionsContent />
       </EntitySwitch.Case>
      */}
-
     <EntitySwitch.Case>
       <EmptyState
         title="No CI/CD available for this entity"
@@ -148,7 +147,7 @@ const overviewContent = (
 
     <EntitySwitch>
       <EntitySwitch.Case if={isKafkaInfoAvailable}>
-        <Grid item md={4} xs={12}>
+        <Grid item xs={12} md={6} lg={4}>
           <EntityKafkaInfoContent />
         </Grid>
       </EntitySwitch.Case>
@@ -172,6 +171,14 @@ const serviceEntityPage = (
       if={isKubernetesAvailable}
     >
       <EntityKubernetesContent />
+    </EntityLayout.Route>
+
+    <EntityLayout.Route
+      path="/kafka"
+      title="Kafka"
+      if={isKafkaInfoAvailable}
+    >
+      <EntityKafkaInfoContent />
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/api" title="API">
@@ -218,6 +225,14 @@ const websiteEntityPage = (
       if={isKubernetesAvailable}
     >
       <EntityKubernetesContent />
+    </EntityLayout.Route>
+
+    <EntityLayout.Route
+      path="/kafka"
+      title="Kafka"
+      if={isKafkaInfoAvailable}
+    >
+      <EntityKafkaInfoContent />
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/dependencies" title="Dependencies">

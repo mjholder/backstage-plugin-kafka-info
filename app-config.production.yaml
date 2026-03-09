@@ -41,13 +41,13 @@ catalog:
     # File locations are relative to the backend process, typically in a deployed context, such as in a Docker container, this will be the root
     - type: file
       target: ./examples/entities.yaml
- 
+
     # Local example template
     - type: file
       target: ./examples/template/template.yaml
       rules:
         - allow: [Template]
- 
+
     # Local example organizational data
     - type: file
       target: ./examples/org.yaml
